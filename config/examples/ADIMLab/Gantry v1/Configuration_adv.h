@@ -183,7 +183,7 @@
   /**
    * As described above, except for the bed (M140/M190/M303).
    */
-  #define WATCH_BED_TEMP_PERIOD                60 // Seconds
+  #define WATCH_BED_TEMP_PERIOD               360 // Seconds
   #define WATCH_BED_TEMP_INCREASE               2 // Degrees Celsius
 #endif
 
@@ -438,15 +438,15 @@
 /**
  * M355 Case Light on-off / brightness
  */
-//#define CASE_LIGHT_ENABLE
+#define CASE_LIGHT_ENABLE
 #if ENABLED(CASE_LIGHT_ENABLE)
-  //#define CASE_LIGHT_PIN 4                  // Override the default pin if needed
+  //#define CASE_LIGHT_PIN 8                  // Override the default pin if needed
   #define INVERT_CASE_LIGHT false             // Set true if Case Light is ON when pin is LOW
   #define CASE_LIGHT_DEFAULT_ON true          // Set default power-up state on
   #define CASE_LIGHT_DEFAULT_BRIGHTNESS 105   // Set default power-up brightness (0-255, requires PWM pin)
   //#define CASE_LIGHT_MAX_PWM 128            // Limit pwm
-  //#define CASE_LIGHT_MENU                   // Add Case Light options to the LCD menu
-  //#define CASE_LIGHT_NO_BRIGHTNESS          // Disable brightness control. Enable for non-PWM lighting.
+  #define CASE_LIGHT_MENU                   // Add Case Light options to the LCD menu
+  #define CASE_LIGHT_NO_BRIGHTNESS          // Disable brightness control. Enable for non-PWM lighting.
   //#define CASE_LIGHT_USE_NEOPIXEL           // Use Neopixel LED as case light, requires NEOPIXEL_LED.
   #if ENABLED(CASE_LIGHT_USE_NEOPIXEL)
     #define CASE_LIGHT_NEOPIXEL_COLOR { 255, 255, 255, 255 } // { Red, Green, Blue, White }
@@ -706,16 +706,23 @@
     // Define one position per Z stepper in stepper driver order.
     #define Z_STEPPER_ALIGN_STEPPER_XY { { 210.7, 102.5 }, { 152.6, 220.0 }, { 94.5, 102.5 } }
   #else
-    // Amplification factor. Used to scale the correction step up or down in case
-    // the stepper (spindle) position is farther out than the test point.
-    #define Z_STEPPER_ALIGN_AMP 1.0       // Use a value > 1.0 NOTE: This may cause instability!
+    // Amplification factor. Used to scale the correction step up or down.
+    // In case the stepper (spindle) position is further out than the test point.
+    // Use a value > 1. NOTE: This may cause instability
+    #define Z_STEPPER_ALIGN_AMP 1.0
   #endif
 
+  // Set number of iterations to align
+  #define Z_STEPPER_ALIGN_ITERATIONS 3
+
+  // Enable to restore leveling setup after operation
+  #define RESTORE_LEVELING_AFTER_G34
+
   // On a 300mm bed a 5% grade would give a misalignment of ~1.5cm
-  #define G34_MAX_GRADE              5    // (%) Maximum incline that G34 will handle
-  #define Z_STEPPER_ALIGN_ITERATIONS 5    // Number of iterations to apply during alignment
-  #define Z_STEPPER_ALIGN_ACC        0.02 // Stop iterating early if the accuracy is better than this
-  #define RESTORE_LEVELING_AFTER_G34      // Restore leveling after G34 is done?
+  #define G34_MAX_GRADE  5  // (%) Maximum incline G34 will handle
+
+  // Stop criterion. If the accuracy is better than this stop iterating early
+  #define Z_STEPPER_ALIGN_ACC 0.02
 #endif
 
 // @section motion
@@ -934,8 +941,8 @@
 // Change values more rapidly when the encoder is rotated faster
 #define ENCODER_RATE_MULTIPLIER
 #if ENABLED(ENCODER_RATE_MULTIPLIER)
-  #define ENCODER_10X_STEPS_PER_SEC   30  // (steps/s) Encoder rate for 10x speed
-  #define ENCODER_100X_STEPS_PER_SEC  80  // (steps/s) Encoder rate for 100x speed
+  #define ENCODER_10X_STEPS_PER_SEC   75  // (steps/s) Encoder rate for 10x speed
+  #define ENCODER_100X_STEPS_PER_SEC 160  // (steps/s) Encoder rate for 100x speed
 #endif
 
 // Play a beep when the feedrate is changed from the Status Screen
@@ -976,13 +983,13 @@
 #endif // HAS_LCD_MENU
 
 // Scroll a longer status message into view
-//#define STATUS_MESSAGE_SCROLLING
+#define STATUS_MESSAGE_SCROLLING
 
 // On the Info Screen, display XY with one decimal place when possible
 //#define LCD_DECIMAL_SMALL_XY
 
 // The timeout (in ms) to return to the status screen from sub-menus
-//#define LCD_TIMEOUT_TO_STATUS 15000
+#define LCD_TIMEOUT_TO_STATUS 60000
 
 // Add an 'M73' G-code to set the current percentage
 //#define LCD_SET_PROGRESS_MANUALLY
@@ -1044,7 +1051,7 @@
   #if ENABLED(POWER_LOSS_RECOVERY)
     //#define BACKUP_POWER_SUPPLY       // Backup power / UPS to move the steppers on power loss
     //#define POWER_LOSS_ZRAISE       2 // (mm) Z axis raise on resume (on power loss with UPS)
-    //#define POWER_LOSS_PIN         44 // Pin to detect power loss
+    //#define POWER_LOSS_PIN         28 // Pin to detect power loss
     //#define POWER_LOSS_STATE     HIGH // State of pin indicating power loss
     //#define POWER_LOSS_PULL           // Set pullup / pulldown as appropriate
     //#define POWER_LOSS_PURGE_LEN   20 // (mm) Length of filament to purge on resume
@@ -1085,8 +1092,8 @@
     #define SDSORT_LIMIT       40     // Maximum number of sorted items (10-256). Costs 27 bytes each.
     #define FOLDER_SORTING     -1     // -1=above  0=none  1=below
     #define SDSORT_GCODE       false  // Allow turning sorting on/off with LCD and M34 g-code.
-    #define SDSORT_USES_RAM    false  // Pre-allocate a static array for faster pre-sorting.
-    #define SDSORT_USES_STACK  false  // Prefer the stack for pre-sorting to give back some SRAM. (Negated by next 2 options.)
+    #define SDSORT_USES_RAM    true  // Pre-allocate a static array for faster pre-sorting.
+    #define SDSORT_USES_STACK  true  // Prefer the stack for pre-sorting to give back some SRAM. (Negated by next 2 options.)
     #define SDSORT_CACHE_NAMES false  // Keep sorted items in RAM longer for speedy performance. Most expensive option.
     #define SDSORT_DYNAMIC_RAM false  // Use dynamic allocation (within SD menus). Least expensive option. Set SDSORT_LIMIT before use!
     #define SDSORT_CACHE_VFATS 2      // Maximum number of 13-byte VFAT entries to use for sorting.
@@ -1443,7 +1450,7 @@
  *
  * Warning: Does not respect endstops!
  */
-//#define BABYSTEPPING
+#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define BABYSTEP_WITHOUT_HOMING
   //#define BABYSTEP_XY                     // Also enable X/Y Babystepping. Not supported on DELTA!
@@ -1842,14 +1849,14 @@
  * Requires NOZZLE_PARK_FEATURE.
  * This feature is required for the default FILAMENT_RUNOUT_SCRIPT.
  */
-//#define ADVANCED_PAUSE_FEATURE
+#define ADVANCED_PAUSE_FEATURE
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
   #define PAUSE_PARK_RETRACT_FEEDRATE         60  // (mm/s) Initial retract feedrate.
-  #define PAUSE_PARK_RETRACT_LENGTH            2  // (mm) Initial retract.
+  #define PAUSE_PARK_RETRACT_LENGTH            4  // (mm) Initial retract.
                                                   // This short retract is done immediately, before parking the nozzle.
   #define FILAMENT_CHANGE_UNLOAD_FEEDRATE     10  // (mm/s) Unload filament feedrate. This can be pretty fast.
   #define FILAMENT_CHANGE_UNLOAD_ACCEL        25  // (mm/s^2) Lower acceleration may allow a faster feedrate.
-  #define FILAMENT_CHANGE_UNLOAD_LENGTH      100  // (mm) The length of filament for a complete unload.
+  #define FILAMENT_CHANGE_UNLOAD_LENGTH        0  // (mm) The length of filament for a complete unload.
                                                   //   For Bowden, the full length of the tube and nozzle.
                                                   //   For direct drive, the full length of the nozzle.
                                                   //   Set to 0 for manual unloading.
@@ -2274,162 +2281,6 @@
   #define E5_HYBRID_THRESHOLD     30
   #define E6_HYBRID_THRESHOLD     30
   #define E7_HYBRID_THRESHOLD     30
-
-  /**
-   * CoolStep. TMC2130 and TMC2209 only.
-   * This mode allows for cooler steppers and energy savings.
-   * STEALTHCHOP_(XY|Z|E) must be enabled to use CoolStep.
-   * The driver will switch to coolStep when stepper speed is over COOLSTEP_THRESHOLD mm/s.
-   * If SG_RESULT goes below COOLSTEP_LOWER_LOAD_THRESHOLD stepper curreent will be increased.
-   * If SG_RESULT goes above COOLSTEP_UPPER_LOAD_THRESHOLD stepper curreent will be decreased.
-   * SEUP sets the increase step width. Value range is 0..3 and computed as 2^SEUP.
-   * SEDN sets the decrease delay. Value range is 0..3, 0 being the slowest.
-   * SEIMIN sets the lower current limit. 0: 1/2 of IRUN, 1:1/4 of IRUN
-   */
-
-  #if AXIS_HAS_COOLSTEP(X)
-    #define X_COOLSTEP_SPEED_THRESHOLD        5
-    #define X_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define X_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define X_COOLSTEP_SEUP                   2
-    #define X_COOLSTEP_SEDN                   0
-    #define X_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(X2)
-    #define X2_COOLSTEP_SPEED_THRESHOLD        5
-    #define X2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define X2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define X2_COOLSTEP_SEUP                   2
-    #define X2_COOLSTEP_SEDN                   0
-    #define X2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Y)
-    #define Y_COOLSTEP_SPEED_THRESHOLD        5
-    #define Y_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Y_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Y_COOLSTEP_SEUP                   2
-    #define Y_COOLSTEP_SEDN                   0
-    #define Y_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Y2)
-    #define Y2_COOLSTEP_SPEED_THRESHOLD        5
-    #define Y2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Y2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Y2_COOLSTEP_SEUP                   2
-    #define Y2_COOLSTEP_SEDN                   0
-    #define Y2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z)
-    #define Z_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z_COOLSTEP_SEUP                   2
-    #define Z_COOLSTEP_SEDN                   0
-    #define Z_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z2)
-    #define Z2_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z2_COOLSTEP_SEUP                   2
-    #define Z2_COOLSTEP_SEDN                   0
-    #define Z2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z3)
-    #define Z3_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z3_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z3_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z3_COOLSTEP_SEUP                   2
-    #define Z3_COOLSTEP_SEDN                   0
-    #define Z3_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z4)
-    #define Z4_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z4_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z4_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z4_COOLSTEP_SEUP                   2
-    #define Z4_COOLSTEP_SEDN                   0
-    #define Z4_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E0)
-    #define E0_COOLSTEP_SPEED_THRESHOLD        5
-    #define E0_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E0_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E0_COOLSTEP_SEUP                   2
-    #define E0_COOLSTEP_SEDN                   0
-    #define E0_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E1)
-    #define E1_COOLSTEP_SPEED_THRESHOLD        5
-    #define E1_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E1_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E1_COOLSTEP_SEUP                   2
-    #define E1_COOLSTEP_SEDN                   0
-    #define E1_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E2)
-    #define E2_COOLSTEP_SPEED_THRESHOLD        5
-    #define E2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E2_COOLSTEP_SEUP                   2
-    #define E2_COOLSTEP_SEDN                   0
-    #define E2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E3)
-    #define E3_COOLSTEP_SPEED_THRESHOLD        5
-    #define E3_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E3_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E3_COOLSTEP_SEUP                   2
-    #define E3_COOLSTEP_SEDN                   0
-    #define E3_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E4)
-    #define E4_COOLSTEP_SPEED_THRESHOLD        5
-    #define E4_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E4_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E4_COOLSTEP_SEUP                   2
-    #define E4_COOLSTEP_SEDN                   0
-    #define E4_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E5)
-    #define E5_COOLSTEP_SPEED_THRESHOLD        5
-    #define E5_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E5_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E5_COOLSTEP_SEUP                   2
-    #define E5_COOLSTEP_SEDN                   0
-    #define E5_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E6)
-    #define E6_COOLSTEP_SPEED_THRESHOLD        5
-    #define E6_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E6_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E6_COOLSTEP_SEUP                   2
-    #define E6_COOLSTEP_SEDN                   0
-    #define E6_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E7)
-    #define E7_COOLSTEP_SPEED_THRESHOLD        5
-    #define E7_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E7_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E7_COOLSTEP_SEUP                   2
-    #define E7_COOLSTEP_SEDN                   0
-    #define E7_COOLSTEP_SEIMIN                 1
-  #endif
 
   /**
    * Use StallGuard2 to home / probe X, Y, Z.

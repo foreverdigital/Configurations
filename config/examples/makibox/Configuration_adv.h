@@ -706,16 +706,23 @@
     // Define one position per Z stepper in stepper driver order.
     #define Z_STEPPER_ALIGN_STEPPER_XY { { 210.7, 102.5 }, { 152.6, 220.0 }, { 94.5, 102.5 } }
   #else
-    // Amplification factor. Used to scale the correction step up or down in case
-    // the stepper (spindle) position is farther out than the test point.
-    #define Z_STEPPER_ALIGN_AMP 1.0       // Use a value > 1.0 NOTE: This may cause instability!
+    // Amplification factor. Used to scale the correction step up or down.
+    // In case the stepper (spindle) position is further out than the test point.
+    // Use a value > 1. NOTE: This may cause instability
+    #define Z_STEPPER_ALIGN_AMP 1.0
   #endif
 
+  // Set number of iterations to align
+  #define Z_STEPPER_ALIGN_ITERATIONS 3
+
+  // Enable to restore leveling setup after operation
+  #define RESTORE_LEVELING_AFTER_G34
+
   // On a 300mm bed a 5% grade would give a misalignment of ~1.5cm
-  #define G34_MAX_GRADE              5    // (%) Maximum incline that G34 will handle
-  #define Z_STEPPER_ALIGN_ITERATIONS 5    // Number of iterations to apply during alignment
-  #define Z_STEPPER_ALIGN_ACC        0.02 // Stop iterating early if the accuracy is better than this
-  #define RESTORE_LEVELING_AFTER_G34      // Restore leveling after G34 is done?
+  #define G34_MAX_GRADE  5  // (%) Maximum incline G34 will handle
+
+  // Stop criterion. If the accuracy is better than this stop iterating early
+  #define Z_STEPPER_ALIGN_ACC 0.02
 #endif
 
 // @section motion
@@ -734,7 +741,7 @@
 // Default stepper release if idle. Set to 0 to deactivate.
 // Steppers will shut down DEFAULT_STEPPER_DEACTIVE_TIME seconds after the last move when DISABLE_INACTIVE_? is true.
 // Time can be set by M18 and M84.
-#define DEFAULT_STEPPER_DEACTIVE_TIME 120
+#define DEFAULT_STEPPER_DEACTIVE_TIME 60
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
 #define DISABLE_INACTIVE_Z true  // Set to false if the nozzle will fall down on your printed part when print has finished.
@@ -911,10 +918,10 @@
 #endif
 
 //#define DIGIPOT_MCP4018          // Requires library from https://github.com/stawel/SlowSoftI2CMaster
-#define DIGIPOT_I2C_NUM_CHANNELS 8 // 5DPRINT: 4     AZTEEG_X3_PRO: 8     MKS SBASE: 5
+#define DIGIPOT_I2C_NUM_CHANNELS 4 // 5DPRINT: 4     AZTEEG_X3_PRO: 8     MKS SBASE: 5
 // Actual motor currents in Amps. The number of entries must match DIGIPOT_I2C_NUM_CHANNELS.
 // These correspond to the physical drivers, so be mindful if the order is changed.
-#define DIGIPOT_I2C_MOTOR_CURRENTS { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }  //  AZTEEG_X3_PRO
+#define DIGIPOT_I2C_MOTOR_CURRENTS { 1.7, 1.7, 1.7, 1.7 }  // 5DPRINT
 
 //===========================================================================
 //=============================Additional Features===========================
@@ -1017,7 +1024,7 @@
   // as SD_DETECT_PIN in your board's pins definitions.
   // This setting should be disabled unless you are using a push button, pulling the pin to ground.
   // Note: This is always disabled for ULTIPANEL (except ELB_FULL_GRAPHIC_CONTROLLER).
-  #define SD_DETECT_INVERTED
+  //#define SD_DETECT_INVERTED
 
   #define SD_FINISHED_STEPPERRELEASE true          // Disable steppers when SD Print is finished
   #define SD_FINISHED_RELEASECOMMAND "M84 X Y Z E" // You might want to keep the Z enabled so your bed stays in place.
@@ -2276,162 +2283,6 @@
   #define E7_HYBRID_THRESHOLD     30
 
   /**
-   * CoolStep. TMC2130 and TMC2209 only.
-   * This mode allows for cooler steppers and energy savings.
-   * STEALTHCHOP_(XY|Z|E) must be enabled to use CoolStep.
-   * The driver will switch to coolStep when stepper speed is over COOLSTEP_THRESHOLD mm/s.
-   * If SG_RESULT goes below COOLSTEP_LOWER_LOAD_THRESHOLD stepper curreent will be increased.
-   * If SG_RESULT goes above COOLSTEP_UPPER_LOAD_THRESHOLD stepper curreent will be decreased.
-   * SEUP sets the increase step width. Value range is 0..3 and computed as 2^SEUP.
-   * SEDN sets the decrease delay. Value range is 0..3, 0 being the slowest.
-   * SEIMIN sets the lower current limit. 0: 1/2 of IRUN, 1:1/4 of IRUN
-   */
-
-  #if AXIS_HAS_COOLSTEP(X)
-    #define X_COOLSTEP_SPEED_THRESHOLD        5
-    #define X_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define X_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define X_COOLSTEP_SEUP                   2
-    #define X_COOLSTEP_SEDN                   0
-    #define X_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(X2)
-    #define X2_COOLSTEP_SPEED_THRESHOLD        5
-    #define X2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define X2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define X2_COOLSTEP_SEUP                   2
-    #define X2_COOLSTEP_SEDN                   0
-    #define X2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Y)
-    #define Y_COOLSTEP_SPEED_THRESHOLD        5
-    #define Y_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Y_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Y_COOLSTEP_SEUP                   2
-    #define Y_COOLSTEP_SEDN                   0
-    #define Y_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Y2)
-    #define Y2_COOLSTEP_SPEED_THRESHOLD        5
-    #define Y2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Y2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Y2_COOLSTEP_SEUP                   2
-    #define Y2_COOLSTEP_SEDN                   0
-    #define Y2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z)
-    #define Z_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z_COOLSTEP_SEUP                   2
-    #define Z_COOLSTEP_SEDN                   0
-    #define Z_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z2)
-    #define Z2_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z2_COOLSTEP_SEUP                   2
-    #define Z2_COOLSTEP_SEDN                   0
-    #define Z2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z3)
-    #define Z3_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z3_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z3_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z3_COOLSTEP_SEUP                   2
-    #define Z3_COOLSTEP_SEDN                   0
-    #define Z3_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(Z4)
-    #define Z4_COOLSTEP_SPEED_THRESHOLD        5
-    #define Z4_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define Z4_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define Z4_COOLSTEP_SEUP                   2
-    #define Z4_COOLSTEP_SEDN                   0
-    #define Z4_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E0)
-    #define E0_COOLSTEP_SPEED_THRESHOLD        5
-    #define E0_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E0_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E0_COOLSTEP_SEUP                   2
-    #define E0_COOLSTEP_SEDN                   0
-    #define E0_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E1)
-    #define E1_COOLSTEP_SPEED_THRESHOLD        5
-    #define E1_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E1_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E1_COOLSTEP_SEUP                   2
-    #define E1_COOLSTEP_SEDN                   0
-    #define E1_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E2)
-    #define E2_COOLSTEP_SPEED_THRESHOLD        5
-    #define E2_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E2_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E2_COOLSTEP_SEUP                   2
-    #define E2_COOLSTEP_SEDN                   0
-    #define E2_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E3)
-    #define E3_COOLSTEP_SPEED_THRESHOLD        5
-    #define E3_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E3_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E3_COOLSTEP_SEUP                   2
-    #define E3_COOLSTEP_SEDN                   0
-    #define E3_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E4)
-    #define E4_COOLSTEP_SPEED_THRESHOLD        5
-    #define E4_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E4_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E4_COOLSTEP_SEUP                   2
-    #define E4_COOLSTEP_SEDN                   0
-    #define E4_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E5)
-    #define E5_COOLSTEP_SPEED_THRESHOLD        5
-    #define E5_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E5_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E5_COOLSTEP_SEUP                   2
-    #define E5_COOLSTEP_SEDN                   0
-    #define E5_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E6)
-    #define E6_COOLSTEP_SPEED_THRESHOLD        5
-    #define E6_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E6_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E6_COOLSTEP_SEUP                   2
-    #define E6_COOLSTEP_SEDN                   0
-    #define E6_COOLSTEP_SEIMIN                 1
-  #endif
-
-  #if AXIS_HAS_COOLSTEP(E7)
-    #define E7_COOLSTEP_SPEED_THRESHOLD        5
-    #define E7_COOLSTEP_LOWER_LOAD_THRESHOLD   7
-    #define E7_COOLSTEP_UPPER_LOAD_THRESHOLD   0
-    #define E7_COOLSTEP_SEUP                   2
-    #define E7_COOLSTEP_SEDN                   0
-    #define E7_COOLSTEP_SEIMIN                 1
-  #endif
-
-  /**
    * Use StallGuard2 to home / probe X, Y, Z.
    *
    * TMC2130, TMC2160, TMC2209, TMC2660, TMC5130, and TMC5160 only
@@ -2996,8 +2847,8 @@
   #define USER_DESC_4 "Heat Bed/Home/Level"
   #define USER_GCODE_4 "M140 S" STRINGIFY(PREHEAT_2_TEMP_BED) "\nG28\nG29"
 
-  #define USER_DESC_5 "Home & Info"
-  #define USER_GCODE_5 "G28\nM503"
+  //#define USER_DESC_5 "Home & Info"
+  //#define USER_GCODE_5 "G28\nM503"
 #endif
 
 /**
